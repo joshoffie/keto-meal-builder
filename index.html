@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Keto Meal Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Archivo+Black&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { overscroll-behavior-y: none; }
+  body {
+    font-family: 'Archivo', sans-serif;
+    background: #0a0a0a;
+    color: #f0f0f0;
+    min-height: 100vh;
+    padding: 14px 14px 120px;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+  .header {
+    border: 2px solid #f0f0f0;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f0f0f0;
+    color: #0a0a0a;
+  }
+  .header h1 {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 18px;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+  }
+  .header .status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* TARGETS PANEL */
+  .targets {
+    border: 2px solid #f0f0f0;
+    padding: 14px;
+    margin-bottom: 18px;
+    background: #141414;
+  }
+  .targets h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #a0a0a0;
+    margin-bottom: 12px;
+  }
+  .target-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .target-grid label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  .target-grid input {
+    width: 100%;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    color: #f0f0f0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    padding: 10px;
+    text-align: center;
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  .target-grid input:focus {
+    outline: none;
+    border-color: #d4ff3a;
+    background: #181818;
+  }
+  .target-grid .unit {
+    font-size: 9px;
+    color: #666;
+    text-align: center;
+    margin-top: 2px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* SECTIONS */
+  section {
+    margin-bottom: 20px;
+  }
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .section-header h2 {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .section-header .hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: #666;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* FOOD ROWS */
+  .food-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .food-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 14px;
+    border: 1px solid #222;
+    background: #141414;
+    cursor: pointer;
+    transition: all 0.1s;
+    min-height: 56px;
+  }
+  .food-row:active {
+    transform: scale(0.985);
+  }
+  .food-row.selected {
+    border-color: #d4ff3a;
+    background: #1a1f0a;
+  }
+  .food-row.selected .food-name {
+    color: #d4ff3a;
+  }
+  .food-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .food-name {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
+  .food-macros {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #888;
+    letter-spacing: 0.3px;
+  }
+  .food-check {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #333;
+    margin-left: 10px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 14px;
+  }
+  .food-row.selected .food-check {
+    background: #d4ff3a;
+    border-color: #d4ff3a;
+    color: #0a0a0a;
+  }
+
+  /* RESULT BAR */
+  .result-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #d4ff3a;
+    color: #0a0a0a;
+    padding: 14px 16px 20px;
+    border-top: 3px solid #0a0a0a;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+    z-index: 100;
+  }
+  .result-bar.empty {
+    background: #1a1a1a;
+    color: #888;
+    border-top-color: #333;
+  }
+  .result-bar.empty .result-instruction {
+    color: #888;
+  }
+  .result-instruction {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #0a0a0a;
+    opacity: 0.7;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .result-amounts {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(10,10,10,0.15);
+  }
+  .result-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .result-row .food {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .result-row .amount {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .result-totals {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px solid #0a0a0a;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+  .result-totals span {
+    display: inline-block;
+    margin: 0 6px;
+  }
+  .result-totals .warn {
+    color: #a00;
+    font-weight: 700;
+  }
+
+  .clear-btn {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 101;
+    display: none;
+  }
+  .clear-btn.show { display: block; }
+
+  /* Mode toggle */
+  .mode-toggle {
+    display: flex;
+    gap: 0;
+    margin-bottom: 16px;
+    border: 2px solid #f0f0f0;
+  }
+  .mode-toggle button {
+    flex: 1;
+    background: transparent;
+    color: #f0f0f0;
+    border: none;
+    padding: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .mode-toggle button.active {
+    background: #f0f0f0;
+    color: #0a0a0a;
+  }
+
+  .footer-note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: #444;
+    text-align: center;
+    margin-top: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 360px) {
+    body { padding: 10px 10px 140px; font-size: 14px; }
+    .target-grid input { font-size: 18px; padding: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>Meal Builder</h1>
+  <div class="status" id="mealStatus">2,200 KCAL / DAY</div>
+</header>
+
+<div class="mode-toggle">
+  <button class="active" data-mode="perMeal">Per meal</button>
+  <button data-mode="daily">Daily</button>
+</div>
+
+<section class="targets">
+  <h2>Targets — edit anytime</h2>
+  <div class="target-grid">
+    <div>
+      <label>Protein</label>
+      <input type="number" inputmode="numeric" id="targetProtein" value="90" min="0" max="500">
+      <div class="unit">grams</div>
+    </div>
+    <div>
+      <label>Fat</label>
+      <input type="number" inputmode="numeric" id="targetFat" value="85" min="0" max="500">
+      <div class="unit">grams</div>
+    </div>
+    <div>
+      <label>Net Carbs</label>
+      <input type="number" inputmode="numeric" id="targetCarbs" value="15" min="0" max="500">
+      <div class="unit">grams max</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-header">
+    <h2>Protein</h2>
+    <span class="hint">Pick 1</span>
+  </div>
+  <div class="food-list" id="proteinList"></div>
+</section>
+
+<section>
+  <div class="section-header">
+    <h2>Fats</h2>
+    <span class="hint">Pick 1–3</span>
+  </div>
+  <div class="food-list" id="fatList"></div>
+</section>
+
+<section>
+  <div class="section-header">
+    <h2>Carbs (fruit / veg)</h2>
+    <span class="hint">Optional</span>
+  </div>
+  <div class="food-list" id="carbList"></div>
+</section>
+
+<div class="footer-note">T1D-friendly · no rice · ghost protocol approved</div>
+
+<div class="result-bar empty" id="resultBar">
+  <div class="result-instruction" id="resultInstruction">Pick a protein + fat to start</div>
+  <div class="result-amounts" id="resultAmounts"></div>
+  <div class="result-totals" id="resultTotals"></div>
+</div>
+
+<script>
+/* ============================================================
+   FOOD DATABASE
+   All macros are per the "base unit" shown in name.
+   p = protein (g), f = fat (g), c = net carbs (g), cal = kcal
+   baseAmount is shown to user so the output feels real (e.g. "10 oz")
+   We store macros per gram so we can scale to any amount needed.
+   ============================================================ */
+
+const PROTEINS = [
+  // name, baseLabel, baseGrams, macrosAtBase {p,f,c,cal}, unitLabel
+  { id: 'ribeye',   name: 'Ribeye steak',         base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 22, f: 17, c: 0, cal: 245} },
+  { id: 'nystrip',  name: 'NY strip',             base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 22, f: 13, c: 0, cal: 205} },
+  { id: 'beef80',   name: 'Ground beef 80/20',    base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 20, f: 20, c: 0, cal: 260} },
+  { id: 'chix',     name: 'Chicken thigh (b/s)',  base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 22, f: 5.5, c: 0, cal: 135} },
+  { id: 'rotiss',   name: 'Rotisserie chicken',   base: 6,  unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 27, f: 12, c: 0, cal: 215} },
+  { id: 'salmon',   name: 'Salmon',               base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 20, f: 13, c: 0, cal: 200} },
+  { id: 'cod',      name: 'Cod',                  base: 12, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 20, f: 0.8, c: 0, cal: 90} },
+  { id: 'shrimp',   name: 'Shrimp',               base: 12, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 20, f: 0.5, c: 0, cal: 85} },
+];
+
+const FATS = [
+  { id: 'egg',        name: 'Whole eggs',        base: 3,  unit: 'egg',  gramsPerUnit: 50,    per100g: {p: 13, f: 10, c: 1.1, cal: 143} },
+  { id: 'avocado',    name: 'Avocado',           base: 1,  unit: 'whole',gramsPerUnit: 200,   per100g: {p: 2,  f: 15, c: 2,   cal: 160} },
+  { id: 'cheddar',    name: 'Cheddar cheese',    base: 2,  unit: 'oz',   gramsPerUnit: 28.35, per100g: {p: 25, f: 33, c: 1.3, cal: 403} },
+  { id: 'mozzarella', name: 'Mozzarella',        base: 2,  unit: 'oz',   gramsPerUnit: 28.35, per100g: {p: 22, f: 22, c: 2.2, cal: 300} },
+  { id: 'butter',     name: 'Butter',            base: 2,  unit: 'tbsp', gramsPerUnit: 14,    per100g: {p: 0.9,f: 81, c: 0.1, cal: 717} },
+  { id: 'oliveoil',   name: 'Olive oil',         base: 2,  unit: 'tbsp', gramsPerUnit: 13.5,  per100g: {p: 0,  f: 100,c: 0,   cal: 884} },
+  { id: 'mayo',       name: 'Mayo (full-fat)',   base: 2,  unit: 'tbsp', gramsPerUnit: 14,    per100g: {p: 1,  f: 75, c: 0.6, cal: 680} },
+  { id: 'cashews',    name: 'Cashews',           base: 1,  unit: 'oz',   gramsPerUnit: 28.35, per100g: {p: 18, f: 44, c: 27,  cal: 553} },
+  { id: 'almonds',    name: 'Almonds',           base: 1,  unit: 'oz',   gramsPerUnit: 28.35, per100g: {p: 21, f: 50, c: 10,  cal: 579} },
+  { id: 'pb',         name: 'Peanut butter',     base: 2,  unit: 'tbsp', gramsPerUnit: 16,    per100g: {p: 25, f: 50, c: 12,  cal: 588} },
+];
+
+const CARBS = [
+  { id: 'raspberry', name: 'Raspberries',  base: 0.5, unit: 'cup',  gramsPerUnit: 123, per100g: {p: 1.2, f: 0.7, c: 5.4, cal: 52} },
+  { id: 'blackberry',name: 'Blackberries', base: 0.5, unit: 'cup',  gramsPerUnit: 144, per100g: {p: 1.4, f: 0.5, c: 4.3, cal: 43} },
+  { id: 'strawberry',name: 'Strawberries', base: 0.5, unit: 'cup',  gramsPerUnit: 76,  per100g: {p: 0.7, f: 0.3, c: 5.5, cal: 32} },
+  { id: 'spinach',   name: 'Spinach',      base: 2,   unit: 'cup',  gramsPerUnit: 30,  per100g: {p: 2.9, f: 0.4, c: 1.4, cal: 23} },
+  { id: 'broccoli',  name: 'Broccoli',     base: 1,   unit: 'cup',  gramsPerUnit: 91,  per100g: {p: 2.8, f: 0.4, c: 4.0, cal: 34} },
+  { id: 'arugula',   name: 'Arugula',      base: 2,   unit: 'cup',  gramsPerUnit: 20,  per100g: {p: 2.6, f: 0.7, c: 2.1, cal: 25} },
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  mode: 'perMeal', // or 'daily'
+  selectedProtein: null,
+  selectedFats: [],   // array of ids
+  selectedCarbs: [],  // array of ids
+  targets: { p: 90, f: 85, c: 15 },
+};
+
+/* ============================================================
+   RENDER FOOD LISTS
+   ============================================================ */
+function formatAmount(units, unitLabel) {
+  // Nice-round for common amounts
+  const rounded = Math.round(units * 10) / 10;
+  let display;
+  if (rounded >= 1 && rounded % 1 === 0) display = rounded.toFixed(0);
+  else if (rounded < 1) display = rounded.toFixed(2).replace(/0$/, '').replace(/\.$/, '');
+  else display = rounded.toFixed(1);
+  // Pluralize simple units
+  let label = unitLabel;
+  if (rounded !== 1 && ['egg','whole'].includes(unitLabel)) {
+    label = unitLabel === 'egg' ? 'eggs' : 'whole';
+  }
+  return `${display} ${label}`;
+}
+
+function macrosPreview(food) {
+  const g = food.base * food.gramsPerUnit;
+  const p = Math.round(food.per100g.p * g / 100);
+  const f = Math.round(food.per100g.f * g / 100);
+  const c = Math.round(food.per100g.c * g / 100 * 10) / 10;
+  const cal = Math.round(food.per100g.cal * g / 100);
+  return `${food.base} ${food.unit} · ${p}P / ${f}F / ${c}C · ${cal}cal`;
+}
+
+function renderList(list, container, group) {
+  container.innerHTML = '';
+  list.forEach(food => {
+    const row = document.createElement('div');
+    row.className = 'food-row';
+    row.dataset.id = food.id;
+    row.dataset.group = group;
+    row.innerHTML = `
+      <div class="food-info">
+        <div class="food-name">${food.name}</div>
+        <div class="food-macros">${macrosPreview(food)}</div>
+      </div>
+      <div class="food-check"></div>
+    `;
+    row.addEventListener('click', () => toggle(group, food.id));
+    container.appendChild(row);
+  });
+}
+
+function toggle(group, id) {
+  if (group === 'protein') {
+    state.selectedProtein = state.selectedProtein === id ? null : id;
+  } else if (group === 'fat') {
+    const i = state.selectedFats.indexOf(id);
+    if (i >= 0) state.selectedFats.splice(i, 1);
+    else {
+      if (state.selectedFats.length >= 3) state.selectedFats.shift(); // keep latest 3
+      state.selectedFats.push(id);
+    }
+  } else if (group === 'carb') {
+    const i = state.selectedCarbs.indexOf(id);
+    if (i >= 0) state.selectedCarbs.splice(i, 1);
+    else state.selectedCarbs.push(id);
+  }
+  updateSelection();
+  calculate();
+}
+
+function updateSelection() {
+  document.querySelectorAll('.food-row').forEach(row => {
+    const g = row.dataset.group;
+    const id = row.dataset.id;
+    let selected = false;
+    if (g === 'protein') selected = state.selectedProtein === id;
+    if (g === 'fat') selected = state.selectedFats.includes(id);
+    if (g === 'carb') selected = state.selectedCarbs.includes(id);
+    row.classList.toggle('selected', selected);
+    row.querySelector('.food-check').textContent = selected ? '✓' : '';
+  });
+}
+
+/* ============================================================
+   CORE CALCULATION
+   Given selected protein + fats + carbs, and targets,
+   compute how much of each to cook.
+
+   Strategy:
+   1) Protein: scale ONLY the selected protein to hit protein target.
+      - This contributes some fat too (carried forward as "fatFromProtein").
+   2) Fats: remaining fat = targetFat - fatFromProtein.
+      - Split remaining fat EVENLY across selected fats by grams of fat.
+      - Each fat gets (remainingFat / N) grams of fat → back into units.
+   3) Carbs: user picked them; they contribute carbs + a bit of protein/fat.
+      - We don't scale carbs for a target — they're a "side", keep at base amount.
+      - BUT we cap at carb target: if carb contribution > target, warn.
+   4) Sum totals, warn if carbs exceed, if fat deficit, or if protein source
+      already exceeds fat target.
+   ============================================================ */
+
+function gramsForUnits(food, units) {
+  return units * food.gramsPerUnit;
+}
+function macrosForUnits(food, units) {
+  const g = gramsForUnits(food, units);
+  return {
+    p: food.per100g.p * g / 100,
+    f: food.per100g.f * g / 100,
+    c: food.per100g.c * g / 100,
+    cal: food.per100g.cal * g / 100,
+    grams: g,
+  };
+}
+function unitsToHitProtein(food, proteinTarget) {
+  // p per unit = per100g.p * gramsPerUnit / 100
+  const pPerUnit = food.per100g.p * food.gramsPerUnit / 100;
+  if (pPerUnit <= 0) return 0;
+  return proteinTarget / pPerUnit;
+}
+function unitsToHitFat(food, fatTarget) {
+  const fPerUnit = food.per100g.f * food.gramsPerUnit / 100;
+  if (fPerUnit <= 0) return 0;
+  return fatTarget / fPerUnit;
+}
+
+/*
+  Linear solve: find (m, k) such that
+    m * protein.pPerGram + k * sumFatP = tP
+    m * protein.fPerGram + k * sumFatF = tF
+  where m = grams of protein to cook, k = scale factor applied to each fat's base portion.
+  Then for each fat i: grams_i = k * base_i_grams; units_i = k * base_i
+*/
+function solveMeal(protein, fats, tP, tF) {
+  const pP = protein.per100g.p / 100;  // protein-per-gram for the protein food
+  const pF = protein.per100g.f / 100;
+  // Sum of (base_grams * pPerGram) across selected fats, weighted equally
+  let sumP = 0, sumF = 0;
+  const fatBaseG = fats.map(f => f.base * f.gramsPerUnit);
+  fats.forEach((f, i) => {
+    sumP += fatBaseG[i] * f.per100g.p / 100;
+    sumF += fatBaseG[i] * f.per100g.f / 100;
+  });
+  // Solve 2x2: [pP sumP; pF sumF] * [m; k] = [tP; tF]
+  const det = pP * sumF - pF * sumP;
+  let m, k;
+  if (Math.abs(det) < 1e-9) {
+    // Degenerate (rare) — fallback: hit protein, use default fat amount
+    m = tP / pP;
+    k = 0;
+  } else {
+    m = (tP * sumF - tF * sumP) / det;
+    k = (pP * tF - pF * tP) / det;
+  }
+  // Clamp to non-negative
+  if (m < 0) m = 0;
+  if (k < 0) k = 0;
+  return { proteinGrams: m, fatScale: k };
+}
+
+function calculate() {
+  const bar = document.getElementById('resultBar');
+  const inst = document.getElementById('resultInstruction');
+  const amounts = document.getElementById('resultAmounts');
+  const totals = document.getElementById('resultTotals');
+
+  const tP = parseFloat(document.getElementById('targetProtein').value) || 0;
+  const tF = parseFloat(document.getElementById('targetFat').value) || 0;
+  const tC = parseFloat(document.getElementById('targetCarbs').value) || 0;
+  state.targets = { p: tP, f: tF, c: tC };
+
+  if (!state.selectedProtein || state.selectedFats.length === 0) {
+    bar.classList.add('empty');
+    inst.textContent = !state.selectedProtein
+      ? 'Pick a protein to start'
+      : 'Now pick at least 1 fat';
+    amounts.innerHTML = '';
+    totals.innerHTML = '';
+    return;
+  }
+
+  bar.classList.remove('empty');
+  inst.textContent = 'Cook this:';
+
+  const results = [];
+  let totalP = 0, totalF = 0, totalC = 0, totalCal = 0;
+
+  const protein = PROTEINS.find(x => x.id === state.selectedProtein);
+  const fats = state.selectedFats.map(id => FATS.find(x => x.id === id));
+
+  // Solve for amounts
+  const { proteinGrams, fatScale } = solveMeal(protein, fats, tP, tF);
+
+  // Detect "impossible to balance" cases BEFORE we compute amounts
+  // Case A: solver wanted negative protein → fats have more protein per gram than target allows
+  // Case B: solver wanted negative fat scale → protein has too much fat for chosen fats
+  // We clamp to 0 in solver; re-detect here by checking if amounts are 0 or if totals won't match
+  const fatTooHigh = fatScale < 0.01 && fats.length > 0;
+  const proteinTooHigh = proteinGrams < 1;
+
+  // 1. Protein — convert grams back to units
+  const pUnits = proteinGrams / protein.gramsPerUnit;
+  const pM = macrosForUnits(protein, pUnits);
+  results.push({ name: protein.name, amount: formatAmount(pUnits, protein.unit) });
+  totalP += pM.p; totalF += pM.f; totalC += pM.c; totalCal += pM.cal;
+
+  // 2. Fats — each scaled by fatScale from its base portion
+  fats.forEach(fat => {
+    const units = fatScale * fat.base;
+    const m = macrosForUnits(fat, units);
+    results.push({ name: fat.name, amount: formatAmount(units, fat.unit) });
+    totalP += m.p; totalF += m.f; totalC += m.c; totalCal += m.cal;
+  });
+
+  // 3. Carbs left as base amount (side)
+  state.selectedCarbs.forEach(id => {
+    const carb = CARBS.find(x => x.id === id);
+    const units = carb.base;
+    const m = macrosForUnits(carb, units);
+    results.push({ name: carb.name, amount: formatAmount(units, carb.unit) });
+    totalP += m.p; totalF += m.f; totalC += m.c; totalCal += m.cal;
+  });
+
+  // Render
+  amounts.innerHTML = results.map(r => `
+    <div class="result-row">
+      <span class="food">${r.name}</span>
+      <span class="amount">${r.amount}</span>
+    </div>
+  `).join('');
+
+  const carbsOver = totalC > tC;
+  const nFats = state.selectedFats.length;
+
+  let warnings = '';
+  if (proteinTooHigh) {
+    warnings += ` · <span class="warn">⚠ PICKED FATS HAVE TOO MUCH PROTEIN — remove some</span>`;
+  }
+  if (fatTooHigh) {
+    warnings += ` · <span class="warn">⚠ PROTEIN ALREADY PROVIDES ENOUGH FAT — can skip fats</span>`;
+  }
+  if (carbsOver) warnings += ` · <span class="warn">⚠ CARBS OVER (${totalC.toFixed(1)}/${tC})</span>`;
+
+  totals.innerHTML = `
+    <span><b>${Math.round(totalCal)}</b>cal</span>
+    <span>P <b>${Math.round(totalP)}</b>g</span>
+    <span>F <b>${Math.round(totalF)}</b>g</span>
+    <span>C <b>${totalC.toFixed(1)}</b>g</span>
+    ${warnings}
+  `;
+}
+
+/* ============================================================
+   MODE TOGGLE
+   ============================================================ */
+document.querySelectorAll('.mode-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-toggle button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode = btn.dataset.mode;
+    if (state.mode === 'daily') {
+      document.getElementById('targetProtein').value = 180;
+      document.getElementById('targetFat').value = 170;
+      document.getElementById('targetCarbs').value = 30;
+      document.getElementById('mealStatus').textContent = 'WHOLE DAY';
+    } else {
+      document.getElementById('targetProtein').value = 90;
+      document.getElementById('targetFat').value = 85;
+      document.getElementById('targetCarbs').value = 15;
+      document.getElementById('mealStatus').textContent = '1,100 KCAL / MEAL';
+    }
+    calculate();
+  });
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+renderList(PROTEINS, document.getElementById('proteinList'), 'protein');
+renderList(FATS, document.getElementById('fatList'), 'fat');
+renderList(CARBS, document.getElementById('carbList'), 'carb');
+
+['targetProtein','targetFat','targetCarbs'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calculate);
+});
+
+calculate();
+</script>
+</body>
+</html>
