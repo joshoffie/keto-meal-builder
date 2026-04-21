@@ -244,6 +244,14 @@
     font-size: 18px;
     font-weight: 700;
   }
+  .result-row.skip-row {
+    opacity: 0.5;
+  }
+  .result-row.skip-row .amount {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
   .result-totals {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
@@ -387,28 +395,29 @@
    ============================================================ */
 
 const PROTEINS = [
-  // name, baseLabel, baseGrams, macrosAtBase {p,f,c,cal}, unitLabel
-  { id: 'ribeye',   name: 'Ribeye steak',         base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 22, f: 17, c: 0, cal: 245} },
-  { id: 'nystrip',  name: 'NY strip',             base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 22, f: 13, c: 0, cal: 205} },
-  { id: 'beef80',   name: 'Ground beef 80/20',    base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 20, f: 20, c: 0, cal: 260} },
-  { id: 'chix',     name: 'Chicken thigh (b/s)',  base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 22, f: 5.5, c: 0, cal: 135} },
-  { id: 'rotiss',   name: 'Rotisserie chicken',   base: 6,  unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 27, f: 12, c: 0, cal: 215} },
-  { id: 'salmon',   name: 'Salmon',               base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 20, f: 13, c: 0, cal: 200} },
-  { id: 'cod',      name: 'Cod',                  base: 12, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 20, f: 0.8, c: 0, cal: 90} },
-  { id: 'shrimp',   name: 'Shrimp',               base: 12, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 20, f: 0.5, c: 0, cal: 85} },
+  // All values per 100g, RAW edible portion (what you buy at the store).
+  // Sources: USDA FoodData Central. Verified Apr 2026.
+  { id: 'ribeye',   name: 'Ribeye steak',         base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 19,   f: 18,  c: 0, cal: 245} },
+  { id: 'nystrip',  name: 'NY strip',             base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 22,   f: 8,   c: 0, cal: 165} },
+  { id: 'beef80',   name: 'Ground beef 80/20',    base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 17,   f: 20,  c: 0, cal: 254} },
+  { id: 'chix',     name: 'Chicken thigh (b/s)',  base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 19,   f: 9,   c: 0, cal: 165} },
+  { id: 'rotiss',   name: 'Rotisserie chicken',   base: 6,  unit: 'oz meat', gramsPerUnit: 28.35, per100g: {p: 26, f: 14, c: 0, cal: 239} },
+  { id: 'salmon',   name: 'Salmon',               base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 20,   f: 13,  c: 0, cal: 208} },
+  { id: 'cod',      name: 'Cod',                  base: 12, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 18,   f: 0.7, c: 0, cal: 82} },
+  { id: 'shrimp',   name: 'Shrimp',               base: 12, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 20,   f: 0.5, c: 0.9, cal: 99} },
 ];
 
 const FATS = [
-  { id: 'egg',        name: 'Whole eggs',        base: 3,  unit: 'egg',  gramsPerUnit: 50,    per100g: {p: 13, f: 10, c: 1.1, cal: 143} },
-  { id: 'avocado',    name: 'Avocado',           base: 1,  unit: 'whole',gramsPerUnit: 200,   per100g: {p: 2,  f: 15, c: 2,   cal: 160} },
-  { id: 'cheddar',    name: 'Cheddar cheese',    base: 2,  unit: 'oz',   gramsPerUnit: 28.35, per100g: {p: 25, f: 33, c: 1.3, cal: 403} },
-  { id: 'mozzarella', name: 'Mozzarella',        base: 2,  unit: 'oz',   gramsPerUnit: 28.35, per100g: {p: 22, f: 22, c: 2.2, cal: 300} },
-  { id: 'butter',     name: 'Butter',            base: 2,  unit: 'tbsp', gramsPerUnit: 14,    per100g: {p: 0.9,f: 81, c: 0.1, cal: 717} },
-  { id: 'oliveoil',   name: 'Olive oil',         base: 2,  unit: 'tbsp', gramsPerUnit: 13.5,  per100g: {p: 0,  f: 100,c: 0,   cal: 884} },
-  { id: 'mayo',       name: 'Mayo (full-fat)',   base: 2,  unit: 'tbsp', gramsPerUnit: 14,    per100g: {p: 1,  f: 75, c: 0.6, cal: 680} },
-  { id: 'cashews',    name: 'Cashews',           base: 1,  unit: 'oz',   gramsPerUnit: 28.35, per100g: {p: 18, f: 44, c: 27,  cal: 553} },
-  { id: 'almonds',    name: 'Almonds',           base: 1,  unit: 'oz',   gramsPerUnit: 28.35, per100g: {p: 21, f: 50, c: 10,  cal: 579} },
-  { id: 'pb',         name: 'Peanut butter',     base: 2,  unit: 'tbsp', gramsPerUnit: 16,    per100g: {p: 25, f: 50, c: 12,  cal: 588} },
+  { id: 'egg',        name: 'Whole eggs',        base: 3,  unit: 'egg',  gramsPerUnit: 50,    per100g: {p: 12.6, f: 9.5, c: 0.7, cal: 143} },
+  { id: 'avocado',    name: 'Avocado',           base: 1,  unit: 'whole',gramsPerUnit: 200,   per100g: {p: 2,    f: 15,  c: 1.8,   cal: 160} },
+  { id: 'cheddar',    name: 'Cheddar cheese',    base: 2,  unit: 'oz',   gramsPerUnit: 28.35, per100g: {p: 23,   f: 33,  c: 3.4, cal: 403} },
+  { id: 'mozzarella', name: 'Mozzarella',        base: 2,  unit: 'oz',   gramsPerUnit: 28.35, per100g: {p: 22,   f: 22,  c: 2.2, cal: 300} },
+  { id: 'butter',     name: 'Butter',            base: 2,  unit: 'tbsp', gramsPerUnit: 14,    per100g: {p: 0.9,  f: 81,  c: 0.1, cal: 717} },
+  { id: 'oliveoil',   name: 'Olive oil',         base: 2,  unit: 'tbsp', gramsPerUnit: 13.5,  per100g: {p: 0,    f: 100, c: 0,   cal: 884} },
+  { id: 'mayo',       name: 'Mayo (full-fat)',   base: 2,  unit: 'tbsp', gramsPerUnit: 14,    per100g: {p: 1,    f: 75,  c: 0.6, cal: 680} },
+  { id: 'cashews',    name: 'Cashews',           base: 1,  unit: 'oz',   gramsPerUnit: 28.35, per100g: {p: 18,   f: 44,  c: 24,  cal: 553} },
+  { id: 'almonds',    name: 'Almonds',           base: 1,  unit: 'oz',   gramsPerUnit: 28.35, per100g: {p: 21,   f: 50,  c: 9,   cal: 579} },
+  { id: 'pb',         name: 'Peanut butter',     base: 2,  unit: 'tbsp', gramsPerUnit: 16,    per100g: {p: 22,   f: 51,  c: 17,  cal: 597} },
 ];
 
 const CARBS = [
@@ -636,7 +645,8 @@ function calculate() {
   fats.forEach(fat => {
     const units = fatScale * fat.base;
     const m = macrosForUnits(fat, units);
-    results.push({ name: fat.name, amount: formatAmount(units, fat.unit) });
+    const displayAmt = units < 0.05 ? 'skip (not needed)' : formatAmount(units, fat.unit);
+    results.push({ name: fat.name, amount: displayAmt, skip: units < 0.05 });
     totalP += m.p; totalF += m.f; totalC += m.c; totalCal += m.cal;
   });
 
@@ -649,9 +659,24 @@ function calculate() {
     totalP += m.p; totalF += m.f; totalC += m.c; totalCal += m.cal;
   });
 
+  // Add helpful note for rotisserie chicken amounts (convert oz meat → fraction of bird)
+  if (state.selectedProtein === 'rotiss') {
+    const pUnits2 = proteinGrams / protein.gramsPerUnit;
+    const wholeBirdMeatOz = 20;
+    const fraction = pUnits2 / wholeBirdMeatOz;
+    let birdNote;
+    if (fraction < 0.35) birdNote = `~1/4 of a bird`;
+    else if (fraction < 0.6)  birdNote = `~1/2 of a bird`;
+    else if (fraction < 0.85) birdNote = `~3/4 of a bird`;
+    else if (fraction < 1.1)  birdNote = `~1 whole bird`;
+    else birdNote = `~${(fraction).toFixed(1)} birds`;
+    // Modify first result row's name to include hint
+    results[0].amount = `${results[0].amount}  (${birdNote})`;
+  }
+
   // Render
   amounts.innerHTML = results.map(r => `
-    <div class="result-row">
+    <div class="result-row${r.skip ? ' skip-row' : ''}">
       <span class="food">${r.name}</span>
       <span class="amount">${r.amount}</span>
     </div>
@@ -659,15 +684,19 @@ function calculate() {
 
   const carbsOver = totalC > tC;
   const nFats = state.selectedFats.length;
+  const overshoot = !proteinTooHigh && !fatTooHigh && (Math.abs(totalP - tP) > 2 || Math.abs(totalF - tF) > 2);
 
   let warnings = '';
   if (proteinTooHigh) {
-    warnings += ` · <span class="warn">⚠ PICKED FATS HAVE TOO MUCH PROTEIN — remove some</span>`;
+    warnings += ` · <span class="warn">⚠ Fats add too much protein — drop one</span>`;
   }
   if (fatTooHigh) {
-    warnings += ` · <span class="warn">⚠ PROTEIN ALREADY PROVIDES ENOUGH FAT — can skip fats</span>`;
+    warnings += ` · <span class="warn">⚠ ${protein.name} has enough fat alone — skip fats</span>`;
   }
-  if (carbsOver) warnings += ` · <span class="warn">⚠ CARBS OVER (${totalC.toFixed(1)}/${tC})</span>`;
+  if (overshoot) {
+    warnings += ` · <span class="warn">⚠ Can't balance — try a leaner protein</span>`;
+  }
+  if (carbsOver) warnings += ` · <span class="warn">⚠ Carbs over (${totalC.toFixed(1)}/${tC})</span>`;
 
   totals.innerHTML = `
     <span><b>${Math.round(totalCal)}</b>cal</span>
