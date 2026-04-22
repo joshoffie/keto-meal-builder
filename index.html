@@ -356,7 +356,7 @@
 <section>
   <div class="section-header">
     <h2>Protein</h2>
-    <span class="hint">Pick 1</span>
+    <span class="hint">Pick 1–2</span>
   </div>
   <div class="food-list" id="proteinList"></div>
 </section>
@@ -400,6 +400,7 @@ const PROTEINS = [
   { id: 'ribeye',   name: 'Ribeye steak',         base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 19,   f: 18,  c: 0, cal: 245} },
   { id: 'nystrip',  name: 'NY strip',             base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 22,   f: 8,   c: 0, cal: 165} },
   { id: 'beef80',   name: 'Ground beef 80/20',    base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 17,   f: 20,  c: 0, cal: 254} },
+  { id: 'beef93',   name: 'Ground beef 93/7 (lean)', base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 22,   f: 7,   c: 0, cal: 152} },
   { id: 'chix',     name: 'Chicken thigh (b/s)',  base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 19,   f: 9,   c: 0, cal: 165} },
   { id: 'rotiss',   name: 'Rotisserie chicken',   base: 6,  unit: 'oz meat', gramsPerUnit: 28.35, per100g: {p: 26, f: 14, c: 0, cal: 239} },
   { id: 'salmon',   name: 'Salmon',               base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 20,   f: 13,  c: 0, cal: 208} },
@@ -434,7 +435,7 @@ const CARBS = [
    ============================================================ */
 const state = {
   mode: 'perMeal', // or 'daily'
-  selectedProtein: null,
+  selectedProteins: [], // array of ids (max 2)
   selectedFats: [],   // array of ids
   selectedCarbs: [],  // array of ids
   targets: { p: 90, f: 85, c: 15 },
@@ -488,7 +489,12 @@ function renderList(list, container, group) {
 
 function toggle(group, id) {
   if (group === 'protein') {
-    state.selectedProtein = state.selectedProtein === id ? null : id;
+    const i = state.selectedProteins.indexOf(id);
+    if (i >= 0) state.selectedProteins.splice(i, 1);
+    else {
+      if (state.selectedProteins.length >= 2) state.selectedProteins.shift();
+      state.selectedProteins.push(id);
+    }
   } else if (group === 'fat') {
     const i = state.selectedFats.indexOf(id);
     if (i >= 0) state.selectedFats.splice(i, 1);
@@ -510,7 +516,7 @@ function updateSelection() {
     const g = row.dataset.group;
     const id = row.dataset.id;
     let selected = false;
-    if (g === 'protein') selected = state.selectedProtein === id;
+    if (g === 'protein') selected = state.selectedProteins.includes(id);
     if (g === 'fat') selected = state.selectedFats.includes(id);
     if (g === 'carb') selected = state.selectedCarbs.includes(id);
     row.classList.toggle('selected', selected);
@@ -562,37 +568,48 @@ function unitsToHitFat(food, fatTarget) {
 }
 
 /*
-  Linear solve: find (m, k) such that
-    m * protein.pPerGram + k * sumFatP = tP
-    m * protein.fPerGram + k * sumFatF = tF
-  where m = grams of protein to cook, k = scale factor applied to each fat's base portion.
-  Then for each fat i: grams_i = k * base_i_grams; units_i = k * base_i
+  Multi-protein solver:
+  - Combine selected proteins into a virtual "blended protein" by averaging
+    their per-gram macros (so each protein contributes equally by mass).
+  - If 2 proteins, the solver returns a total gram mass which is split 50/50.
+  - Then solve the 2x2 linear system as before:
+      m * blendedP + k * sumFatP = tP
+      m * blendedF + k * sumFatF = tF
+  - For edge cases (all fats have too much protein, or protein already over-fat),
+    clamp to non-negative and rely on warnings to explain to the user.
 */
-function solveMeal(protein, fats, tP, tF) {
-  const pP = protein.per100g.p / 100;  // protein-per-gram for the protein food
-  const pF = protein.per100g.f / 100;
-  // Sum of (base_grams * pPerGram) across selected fats, weighted equally
+function solveMeal(proteins, fats, tP, tF) {
+  if (proteins.length === 0) return null;
+  // Blended per-gram macros (equal-mass split)
+  const n = proteins.length;
+  let pP = 0, pF = 0;
+  proteins.forEach(p => {
+    pP += p.per100g.p / 100 / n;
+    pF += p.per100g.f / 100 / n;
+  });
   let sumP = 0, sumF = 0;
   const fatBaseG = fats.map(f => f.base * f.gramsPerUnit);
   fats.forEach((f, i) => {
     sumP += fatBaseG[i] * f.per100g.p / 100;
     sumF += fatBaseG[i] * f.per100g.f / 100;
   });
-  // Solve 2x2: [pP sumP; pF sumF] * [m; k] = [tP; tF]
   const det = pP * sumF - pF * sumP;
-  let m, k;
-  if (Math.abs(det) < 1e-9) {
-    // Degenerate (rare) — fallback: hit protein, use default fat amount
-    m = tP / pP;
+  let mTotal, k;
+  if (fats.length === 0) {
+    // No fats — just hit protein (may overshoot fat, will warn)
+    mTotal = tP / pP;
+    k = 0;
+  } else if (Math.abs(det) < 1e-9) {
+    mTotal = tP / pP;
     k = 0;
   } else {
-    m = (tP * sumF - tF * sumP) / det;
+    mTotal = (tP * sumF - tF * sumP) / det;
     k = (pP * tF - pF * tP) / det;
   }
-  // Clamp to non-negative
-  if (m < 0) m = 0;
+  if (mTotal < 0) mTotal = 0;
   if (k < 0) k = 0;
-  return { proteinGrams: m, fatScale: k };
+  // Return total grams (will be split equally across proteins)
+  return { totalProteinGrams: mTotal, gramsPerProtein: mTotal / n, fatScale: k };
 }
 
 function calculate() {
@@ -606,14 +623,15 @@ function calculate() {
   const tC = parseFloat(document.getElementById('targetCarbs').value) || 0;
   state.targets = { p: tP, f: tF, c: tC };
 
-  if (!state.selectedProtein || state.selectedFats.length === 0) {
+  if (state.selectedProteins.length === 0) {
     bar.classList.add('empty');
-    inst.textContent = !state.selectedProtein
-      ? 'Pick a protein to start'
-      : 'Now pick at least 1 fat';
+    inst.textContent = 'Pick a protein to start';
     amounts.innerHTML = '';
     totals.innerHTML = '';
     return;
+  }
+  if (state.selectedFats.length === 0) {
+    // Allow fat-less meals but warn; still run solver
   }
 
   bar.classList.remove('empty');
@@ -622,24 +640,39 @@ function calculate() {
   const results = [];
   let totalP = 0, totalF = 0, totalC = 0, totalCal = 0;
 
-  const protein = PROTEINS.find(x => x.id === state.selectedProtein);
+  const proteins = state.selectedProteins.map(id => PROTEINS.find(x => x.id === id));
   const fats = state.selectedFats.map(id => FATS.find(x => x.id === id));
 
-  // Solve for amounts
-  const { proteinGrams, fatScale } = solveMeal(protein, fats, tP, tF);
+  const solution = solveMeal(proteins, fats, tP, tF);
+  const { gramsPerProtein, fatScale } = solution;
 
-  // Detect "impossible to balance" cases BEFORE we compute amounts
-  // Case A: solver wanted negative protein → fats have more protein per gram than target allows
-  // Case B: solver wanted negative fat scale → protein has too much fat for chosen fats
-  // We clamp to 0 in solver; re-detect here by checking if amounts are 0 or if totals won't match
-  const fatTooHigh = fatScale < 0.01 && fats.length > 0;
-  const proteinTooHigh = proteinGrams < 1;
+  // Edge detection
+  const fatTooHigh = fats.length > 0 && fatScale < 0.01;
+  const proteinTooHigh = gramsPerProtein < 1;
 
-  // 1. Protein — convert grams back to units
-  const pUnits = proteinGrams / protein.gramsPerUnit;
-  const pM = macrosForUnits(protein, pUnits);
-  results.push({ name: protein.name, amount: formatAmount(pUnits, protein.unit) });
-  totalP += pM.p; totalF += pM.f; totalC += pM.c; totalCal += pM.cal;
+  // 1. Proteins — each gets same mass (gramsPerProtein)
+  proteins.forEach(p => {
+    const units = gramsPerProtein / p.gramsPerUnit;
+    const m = macrosForUnits(p, units);
+    let displayName = p.name;
+    let amountStr = formatAmount(units, p.unit);
+
+    // Rotisserie bird-fraction hint
+    if (p.id === 'rotiss') {
+      const wholeBirdMeatOz = 20;
+      const fraction = units / wholeBirdMeatOz;
+      let birdNote;
+      if (fraction < 0.35) birdNote = '~1/4 bird';
+      else if (fraction < 0.6) birdNote = '~1/2 bird';
+      else if (fraction < 0.85) birdNote = '~3/4 bird';
+      else if (fraction < 1.1) birdNote = '~1 bird';
+      else birdNote = `~${fraction.toFixed(1)} birds`;
+      amountStr = `${amountStr} (${birdNote})`;
+    }
+
+    results.push({ name: displayName, amount: amountStr });
+    totalP += m.p; totalF += m.f; totalC += m.c; totalCal += m.cal;
+  });
 
   // 2. Fats — each scaled by fatScale from its base portion
   fats.forEach(fat => {
@@ -650,7 +683,7 @@ function calculate() {
     totalP += m.p; totalF += m.f; totalC += m.c; totalCal += m.cal;
   });
 
-  // 3. Carbs left as base amount (side)
+  // 3. Carbs — keep at base amount (side)
   state.selectedCarbs.forEach(id => {
     const carb = CARBS.find(x => x.id === id);
     const units = carb.base;
@@ -658,21 +691,6 @@ function calculate() {
     results.push({ name: carb.name, amount: formatAmount(units, carb.unit) });
     totalP += m.p; totalF += m.f; totalC += m.c; totalCal += m.cal;
   });
-
-  // Add helpful note for rotisserie chicken amounts (convert oz meat → fraction of bird)
-  if (state.selectedProtein === 'rotiss') {
-    const pUnits2 = proteinGrams / protein.gramsPerUnit;
-    const wholeBirdMeatOz = 20;
-    const fraction = pUnits2 / wholeBirdMeatOz;
-    let birdNote;
-    if (fraction < 0.35) birdNote = `~1/4 of a bird`;
-    else if (fraction < 0.6)  birdNote = `~1/2 of a bird`;
-    else if (fraction < 0.85) birdNote = `~3/4 of a bird`;
-    else if (fraction < 1.1)  birdNote = `~1 whole bird`;
-    else birdNote = `~${(fraction).toFixed(1)} birds`;
-    // Modify first result row's name to include hint
-    results[0].amount = `${results[0].amount}  (${birdNote})`;
-  }
 
   // Render
   amounts.innerHTML = results.map(r => `
@@ -683,15 +701,15 @@ function calculate() {
   `).join('');
 
   const carbsOver = totalC > tC;
-  const nFats = state.selectedFats.length;
   const overshoot = !proteinTooHigh && !fatTooHigh && (Math.abs(totalP - tP) > 2 || Math.abs(totalF - tF) > 2);
+  const proteinName = proteins.map(p => p.name).join(' + ');
 
   let warnings = '';
   if (proteinTooHigh) {
     warnings += ` · <span class="warn">⚠ Fats add too much protein — drop one</span>`;
   }
   if (fatTooHigh) {
-    warnings += ` · <span class="warn">⚠ ${protein.name} has enough fat alone — skip fats</span>`;
+    warnings += ` · <span class="warn">⚠ ${proteinName} has enough fat alone — skip fats</span>`;
   }
   if (overshoot) {
     warnings += ` · <span class="warn">⚠ Can't balance — try a leaner protein</span>`;
