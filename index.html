@@ -104,6 +104,46 @@
     font-family: 'JetBrains Mono', monospace;
   }
 
+  /* Hero calorie input */
+  .target-cal {
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .target-cal label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  .target-cal input {
+    width: 100%;
+    background: #0a0a0a;
+    border: 1px solid #d4ff3a;
+    color: #d4ff3a;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    padding: 12px;
+    text-align: center;
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  .target-cal input:focus {
+    outline: none;
+    background: #181818;
+  }
+  .target-cal .unit {
+    font-size: 9px;
+    color: #666;
+    text-align: center;
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
   /* SECTIONS */
   section {
     margin-bottom: 20px;
@@ -328,7 +368,7 @@
 
 <header class="header">
   <h1>Meal Builder</h1>
-  <div class="status" id="mealStatus">2,200 KCAL / DAY</div>
+  <div class="status" id="mealStatus">1,400 KCAL / MEAL</div>
 </header>
 
 <div class="mode-toggle">
@@ -338,20 +378,25 @@
 
 <section class="targets">
   <h2>Targets — edit anytime</h2>
+  <div class="target-cal">
+    <label>Calories</label>
+    <input type="number" inputmode="numeric" id="targetCalories" value="1400" min="0" max="5000">
+    <div class="unit">per meal · tap macros to fine-tune</div>
+  </div>
   <div class="target-grid">
     <div>
       <label>Protein</label>
-      <input type="number" inputmode="numeric" id="targetProtein" value="90" min="0" max="500">
+      <input type="number" inputmode="numeric" id="targetProtein" value="105" min="0" max="500">
       <div class="unit">grams</div>
     </div>
     <div>
       <label>Fat</label>
-      <input type="number" inputmode="numeric" id="targetFat" value="85" min="0" max="500">
+      <input type="number" inputmode="numeric" id="targetFat" value="101" min="0" max="500">
       <div class="unit">grams</div>
     </div>
     <div>
       <label>Net Carbs</label>
-      <input type="number" inputmode="numeric" id="targetCarbs" value="15" min="0" max="500">
+      <input type="number" inputmode="numeric" id="targetCarbs" value="18" min="0" max="500">
       <div class="unit">grams max</div>
     </div>
   </div>
@@ -765,25 +810,67 @@ function calculate() {
 }
 
 /* ============================================================
-   MODE TOGGLE
+   CALORIE <-> MACRO SYNC
+   Keto ratios: ~30% protein, ~65% fat, ~5% net carbs
+   Calories per gram: protein 4, fat 9, carbs 4
+
+   When calories change -> derive macros automatically.
+   When user edits a macro -> recompute calories to match.
    ============================================================ */
+const KETO_RATIOS = { protein: 0.30, fat: 0.65, carbs: 0.05 };
+
+function deriveMacrosFromCalories(cal) {
+  const p = Math.round(cal * KETO_RATIOS.protein / 4);
+  const f = Math.round(cal * KETO_RATIOS.fat / 9);
+  const c = Math.round(cal * KETO_RATIOS.carbs / 4);
+  return { p, f, c };
+}
+function caloriesFromMacros(p, f, c) {
+  return Math.round(p * 4 + f * 9 + c * 4);
+}
+
+let syncing = false; // prevent input event loops
+
+function syncFromCalories() {
+  if (syncing) return;
+  syncing = true;
+  const cal = parseFloat(document.getElementById('targetCalories').value) || 0;
+  const { p, f, c } = deriveMacrosFromCalories(cal);
+  document.getElementById('targetProtein').value = p;
+  document.getElementById('targetFat').value = f;
+  document.getElementById('targetCarbs').value = c;
+  syncing = false;
+  calculate();
+}
+function syncFromMacros() {
+  if (syncing) return;
+  syncing = true;
+  const p = parseFloat(document.getElementById('targetProtein').value) || 0;
+  const f = parseFloat(document.getElementById('targetFat').value) || 0;
+  const c = parseFloat(document.getElementById('targetCarbs').value) || 0;
+  document.getElementById('targetCalories').value = caloriesFromMacros(p, f, c);
+  syncing = false;
+  calculate();
+}
+
+/* ============================================================
+   MODE TOGGLE (per meal vs daily)
+   Sets calorie target, then derives macros from it.
+   ============================================================ */
+const MEAL_CAL = 1400;
+const DAILY_CAL = 2800; // active 175lb male maintenance estimate
+
 document.querySelectorAll('.mode-toggle button').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.mode-toggle button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     state.mode = btn.dataset.mode;
-    if (state.mode === 'daily') {
-      document.getElementById('targetProtein').value = 180;
-      document.getElementById('targetFat').value = 170;
-      document.getElementById('targetCarbs').value = 30;
-      document.getElementById('mealStatus').textContent = 'WHOLE DAY';
-    } else {
-      document.getElementById('targetProtein').value = 90;
-      document.getElementById('targetFat').value = 85;
-      document.getElementById('targetCarbs').value = 15;
-      document.getElementById('mealStatus').textContent = '1,100 KCAL / MEAL';
-    }
-    calculate();
+    const cal = state.mode === 'daily' ? DAILY_CAL : MEAL_CAL;
+    document.getElementById('targetCalories').value = cal;
+    syncFromCalories();
+    document.getElementById('mealStatus').textContent = state.mode === 'daily'
+      ? `${cal.toLocaleString()} KCAL / DAY`
+      : `${cal.toLocaleString()} KCAL / MEAL`;
   });
 });
 
@@ -794,8 +881,9 @@ renderList(PROTEINS, document.getElementById('proteinList'), 'protein');
 renderList(FATS, document.getElementById('fatList'), 'fat');
 renderList(CARBS, document.getElementById('carbList'), 'carb');
 
+document.getElementById('targetCalories').addEventListener('input', syncFromCalories);
 ['targetProtein','targetFat','targetCarbs'].forEach(id => {
-  document.getElementById(id).addEventListener('input', calculate);
+  document.getElementById(id).addEventListener('input', syncFromMacros);
 });
 
 calculate();
