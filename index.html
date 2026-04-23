@@ -229,6 +229,67 @@
     color: #0a0a0a;
   }
 
+  /* Amount input that appears when food is selected */
+  .food-row-main {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  .food-row {
+    display: block;
+    padding: 0;
+  }
+  .food-row.selected { padding-bottom: 0; }
+  .food-row > .food-row-main {
+    padding: 12px 14px;
+  }
+  .food-amount {
+    padding: 10px 14px 14px;
+    border-top: 1px dashed #333;
+    background: #0f0f0f;
+  }
+  .food-amount label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 6px;
+  }
+  .amount-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .amount-input {
+    flex: 1;
+    background: #0a0a0a;
+    border: 1px solid #d4ff3a;
+    color: #d4ff3a;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    padding: 10px 12px;
+    text-align: left;
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  .amount-input:focus { outline: none; background: #181818; }
+  .amount-unit {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #aaa;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    min-width: 56px;
+  }
+
+  /* Delta badges in totals */
+  .delta-ok { color: #0a0a0a; opacity: 0.5; }
+  .delta-mid { color: #0a0a0a; opacity: 0.7; font-weight: 600; }
+  .delta-warn { color: #aa0000; font-weight: 700; }
+
   /* RESULT BAR */
   .result-bar {
     position: fixed;
@@ -362,6 +423,196 @@
     body { padding: 10px 10px 140px; font-size: 14px; }
     .target-grid input { font-size: 18px; padding: 8px; }
   }
+
+  /* ========== TABS ========== */
+  .tab-nav {
+    display: flex;
+    gap: 0;
+    margin-bottom: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: #0a0a0a;
+    padding: 6px 0;
+  }
+  .tab-btn {
+    flex: 1;
+    background: transparent;
+    color: #666;
+    border: 2px solid #2a2a2a;
+    padding: 12px;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .tab-btn + .tab-btn { border-left: none; }
+  .tab-btn.active {
+    background: #d4ff3a;
+    color: #0a0a0a;
+    border-color: #d4ff3a;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ========== SAVE MEAL BUTTON ========== */
+  .save-meal-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    background: #0a0a0a;
+    color: #d4ff3a;
+    border: 2px solid #0a0a0a;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .save-meal-btn:active { transform: scale(0.97); }
+  .save-meal-btn.saved {
+    background: #2a5a2a;
+    color: #d4ff3a;
+    border-color: #2a5a2a;
+  }
+
+  /* ========== STATS ========== */
+  .stats-summary { margin-bottom: 20px; }
+  .stat-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .stat-card {
+    flex: 1;
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    padding: 14px 12px;
+  }
+  .stat-card.wide { flex: 1; }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 6px;
+  }
+  .stat-big {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: #d4ff3a;
+    line-height: 1;
+  }
+  .stat-unit {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #666;
+    margin-top: 2px;
+  }
+  .stat-macros {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+  }
+  .stat-30day {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #ddd;
+    margin-top: 4px;
+    line-height: 1.6;
+  }
+
+  /* ========== MEAL LOG ========== */
+  .meal-log {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .empty-log {
+    padding: 18px;
+    text-align: center;
+    color: #555;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    border: 1px dashed #333;
+    line-height: 1.6;
+  }
+  .meal-entry {
+    background: #141414;
+    border: 1px solid #222;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .meal-entry-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .meal-entry-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #888;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .meal-entry-cal {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: #d4ff3a;
+  }
+  .meal-entry-foods {
+    font-size: 12px;
+    color: #ccc;
+    line-height: 1.4;
+  }
+  .meal-entry-macros {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #888;
+    letter-spacing: 0.3px;
+  }
+  .meal-entry-del {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    background: transparent;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  /* ========== DATA ACTIONS ========== */
+  .data-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .action-btn {
+    flex: 1;
+    background: #141414;
+    color: #aaa;
+    border: 1px solid #333;
+    padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .action-btn.danger {
+    color: #a66;
+    border-color: #442;
+  }
+  .action-btn:active { transform: scale(0.97); }
 </style>
 </head>
 <body>
@@ -370,6 +621,15 @@
   <h1>Meal Builder</h1>
   <div class="status" id="mealStatus">1,400 KCAL / MEAL</div>
 </header>
+
+<!-- Main tab nav -->
+<div class="tab-nav">
+  <button class="tab-btn active" data-tab="builder">Builder</button>
+  <button class="tab-btn" data-tab="stats">Stats</button>
+</div>
+
+<!-- ============ BUILDER TAB ============ -->
+<div class="tab-panel active" id="panel-builder">
 
 <div class="mode-toggle">
   <button class="active" data-mode="perMeal">Per meal</button>
@@ -405,7 +665,7 @@
 <section>
   <div class="section-header">
     <h2>Protein</h2>
-    <span class="hint">Pick 1–2</span>
+    <span class="hint">Tap + set amount</span>
   </div>
   <div class="food-list" id="proteinList"></div>
 </section>
@@ -413,7 +673,7 @@
 <section>
   <div class="section-header">
     <h2>Fats</h2>
-    <span class="hint">Pick 1–3</span>
+    <span class="hint">Tap + set amount</span>
   </div>
   <div class="food-list" id="fatList"></div>
 </section>
@@ -421,17 +681,64 @@
 <section>
   <div class="section-header">
     <h2>Carbs (fruit / veg)</h2>
-    <span class="hint">Optional</span>
+    <span class="hint">Tap + set amount</span>
   </div>
   <div class="food-list" id="carbList"></div>
 </section>
 
 <div class="footer-note">T1D-friendly · no rice · ghost protocol approved</div>
 
+</div><!-- end builder panel -->
+
+<!-- ============ STATS TAB ============ -->
+<div class="tab-panel" id="panel-stats">
+
+  <section class="stats-summary">
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-label">Today</div>
+        <div class="stat-big" id="statTodayCal">0</div>
+        <div class="stat-unit">cal · <span id="statTodayMeals">0</span> meals</div>
+        <div class="stat-macros" id="statTodayMacros">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">7-day avg</div>
+        <div class="stat-big" id="statWeekCal">0</div>
+        <div class="stat-unit">cal / day</div>
+        <div class="stat-macros" id="statWeekMacros">—</div>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card wide">
+        <div class="stat-label">30-day totals</div>
+        <div class="stat-30day" id="stat30day">—</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-header">
+      <h2>Recent meals</h2>
+      <span class="hint" id="mealCount">0 logged</span>
+    </div>
+    <div class="meal-log" id="mealLog">
+      <div class="empty-log">No meals saved yet. Build a meal and tap "Save meal" to start tracking.</div>
+    </div>
+  </section>
+
+  <section class="data-actions">
+    <button class="action-btn" id="exportBtn">Export data (JSON)</button>
+    <button class="action-btn danger" id="clearBtn">Clear all data</button>
+  </section>
+
+</div><!-- end stats panel -->
+
 <div class="result-bar empty" id="resultBar">
   <div class="result-instruction" id="resultInstruction">Pick a protein + fat to start</div>
   <div class="result-amounts" id="resultAmounts"></div>
   <div class="result-totals" id="resultTotals"></div>
+  <button class="save-meal-btn" id="saveMealBtn" style="display:none">+ Save meal</button>
 </div>
 
 <script>
@@ -446,15 +753,16 @@
 const PROTEINS = [
   // All values per 100g, RAW edible portion (what you buy at the store).
   // Sources: USDA FoodData Central. Verified Apr 2026.
-  { id: 'ribeye',   name: 'Ribeye steak',         base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 19,   f: 18,  c: 0, cal: 245} },
-  { id: 'nystrip',  name: 'NY strip',             base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 22,   f: 8,   c: 0, cal: 165} },
-  { id: 'beef80',   name: 'Ground beef 80/20',    base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 17,   f: 20,  c: 0, cal: 254} },
-  { id: 'beef93',   name: 'Ground beef 93/7 (lean)', base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 22,   f: 7,   c: 0, cal: 152} },
-  { id: 'chix',     name: 'Chicken thigh (b/s)',  base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 19,   f: 9,   c: 0, cal: 165} },
-  { id: 'rotiss',   name: 'Rotisserie chicken',   base: 6,  unit: 'oz meat', gramsPerUnit: 28.35, per100g: {p: 26, f: 14, c: 0, cal: 239} },
-  { id: 'salmon',   name: 'Salmon',               base: 10, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 20,   f: 13,  c: 0, cal: 208} },
-  { id: 'cod',      name: 'Cod',                  base: 12, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 18,   f: 0.7, c: 0, cal: 82} },
-  { id: 'shrimp',   name: 'Shrimp',               base: 12, unit: 'oz', gramsPerUnit: 28.35, per100g: {p: 20,   f: 0.5, c: 0.9, cal: 99} },
+  // Meat sold by the pound; default = 1 lb ("I bought a pound")
+  { id: 'ribeye',   name: 'Ribeye steak',         base: 1,    unit: 'lb', gramsPerUnit: 453.592, per100g: {p: 19,   f: 18,  c: 0, cal: 245} },
+  { id: 'nystrip',  name: 'NY strip',             base: 1,    unit: 'lb', gramsPerUnit: 453.592, per100g: {p: 22,   f: 8,   c: 0, cal: 165} },
+  { id: 'beef80',   name: 'Ground beef 80/20',    base: 1,    unit: 'lb', gramsPerUnit: 453.592, per100g: {p: 17,   f: 20,  c: 0, cal: 254} },
+  { id: 'beef93',   name: 'Ground beef 93/7',     base: 1,    unit: 'lb', gramsPerUnit: 453.592, per100g: {p: 22,   f: 7,   c: 0, cal: 152} },
+  { id: 'chix',     name: 'Chicken thigh (b/s)',  base: 1,    unit: 'lb', gramsPerUnit: 453.592, per100g: {p: 19,   f: 9,   c: 0, cal: 165} },
+  { id: 'rotiss',   name: 'Rotisserie chicken',   base: 0.75, unit: 'lb meat', gramsPerUnit: 453.592, per100g: {p: 26, f: 14, c: 0, cal: 239} },
+  { id: 'salmon',   name: 'Salmon',               base: 1,    unit: 'lb', gramsPerUnit: 453.592, per100g: {p: 20,   f: 13,  c: 0, cal: 208} },
+  { id: 'cod',      name: 'Cod',                  base: 1,    unit: 'lb', gramsPerUnit: 453.592, per100g: {p: 18,   f: 0.7, c: 0, cal: 82} },
+  { id: 'shrimp',   name: 'Shrimp',               base: 1,    unit: 'lb', gramsPerUnit: 453.592, per100g: {p: 20,   f: 0.5, c: 0.9, cal: 99} },
 ];
 
 const FATS = [
@@ -483,11 +791,11 @@ const CARBS = [
    STATE
    ============================================================ */
 const state = {
-  mode: 'perMeal', // or 'daily'
-  selectedProteins: [], // array of ids (max 2)
-  selectedFats: [],   // array of ids
-  selectedCarbs: [],  // array of ids
-  targets: { p: 90, f: 85, c: 15 },
+  mode: 'perMeal',
+  // amounts[foodId] = number of units (e.g., "ribeye": 1, "avocado": 2)
+  // absence = not selected
+  amounts: {},
+  targets: { p: 105, f: 101, c: 18 },
 };
 
 /* ============================================================
@@ -560,71 +868,157 @@ function renderList(list, container, group) {
     row.dataset.id = food.id;
     row.dataset.group = group;
     row.innerHTML = `
-      <div class="food-info">
-        <div class="food-name">${food.name}</div>
-        <div class="food-macros">${macrosPreview(food)}</div>
+      <div class="food-row-main">
+        <div class="food-info">
+          <div class="food-name">${food.name}</div>
+          <div class="food-macros">${macrosPreview(food)}</div>
+        </div>
+        <div class="food-check"></div>
       </div>
-      <div class="food-check"></div>
+      <div class="food-amount" style="display:none">
+        <label>How much do you have?</label>
+        <div class="amount-input-row">
+          <input type="number" step="0.1" min="0" class="amount-input" data-id="${food.id}">
+          <span class="amount-unit">${food.unit}</span>
+        </div>
+      </div>
     `;
-    row.addEventListener('click', () => toggle(group, food.id));
+    row.querySelector('.food-row-main').addEventListener('click', () => toggle(food.id));
+    row.querySelector('.amount-input').addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      if (!isNaN(val) && val >= 0) {
+        state.amounts[food.id] = val;
+      } else if (e.target.value === '') {
+        state.amounts[food.id] = 0;
+      }
+      calculate();
+    });
+    row.querySelector('.amount-input').addEventListener('click', (e) => e.stopPropagation());
     container.appendChild(row);
   });
 }
 
-function toggle(group, id) {
-  if (group === 'protein') {
-    const i = state.selectedProteins.indexOf(id);
-    if (i >= 0) state.selectedProteins.splice(i, 1);
-    else {
-      if (state.selectedProteins.length >= 2) state.selectedProteins.shift();
-      state.selectedProteins.push(id);
-    }
-  } else if (group === 'fat') {
-    const i = state.selectedFats.indexOf(id);
-    if (i >= 0) state.selectedFats.splice(i, 1);
-    else {
-      if (state.selectedFats.length >= 3) state.selectedFats.shift(); // keep latest 3
-      state.selectedFats.push(id);
-    }
-  } else if (group === 'carb') {
-    const i = state.selectedCarbs.indexOf(id);
-    if (i >= 0) state.selectedCarbs.splice(i, 1);
-    else state.selectedCarbs.push(id);
+function toggle(id) {
+  if (state.amounts[id] !== undefined) {
+    delete state.amounts[id];
+  } else {
+    // Find food and set to default base amount
+    const food = findFood(id);
+    if (food) state.amounts[id] = food.base;
   }
   updateSelection();
   calculate();
 }
 
+function findFood(id) {
+  return PROTEINS.find(x => x.id === id) ||
+         FATS.find(x => x.id === id) ||
+         CARBS.find(x => x.id === id);
+}
+
 function updateSelection() {
   document.querySelectorAll('.food-row').forEach(row => {
-    const g = row.dataset.group;
     const id = row.dataset.id;
-    let selected = false;
-    if (g === 'protein') selected = state.selectedProteins.includes(id);
-    if (g === 'fat') selected = state.selectedFats.includes(id);
-    if (g === 'carb') selected = state.selectedCarbs.includes(id);
+    const selected = state.amounts[id] !== undefined;
     row.classList.toggle('selected', selected);
     row.querySelector('.food-check').textContent = selected ? '✓' : '';
+    const amountDiv = row.querySelector('.food-amount');
+    amountDiv.style.display = selected ? 'block' : 'none';
+    if (selected) {
+      const input = row.querySelector('.amount-input');
+      // Only update if user hasn't typed in it (check focus)
+      if (document.activeElement !== input) {
+        input.value = state.amounts[id];
+      }
+    }
   });
 }
 
-/* ============================================================
-   CORE CALCULATION
-   Given selected protein + fats + carbs, and targets,
-   compute how much of each to cook.
+function calculate() {
+  const bar = document.getElementById('resultBar');
+  const inst = document.getElementById('resultInstruction');
+  const amountsEl = document.getElementById('resultAmounts');
+  const totals = document.getElementById('resultTotals');
 
-   Strategy:
-   1) Protein: scale ONLY the selected protein to hit protein target.
-      - This contributes some fat too (carried forward as "fatFromProtein").
-   2) Fats: remaining fat = targetFat - fatFromProtein.
-      - Split remaining fat EVENLY across selected fats by grams of fat.
-      - Each fat gets (remainingFat / N) grams of fat → back into units.
-   3) Carbs: user picked them; they contribute carbs + a bit of protein/fat.
-      - We don't scale carbs for a target — they're a "side", keep at base amount.
-      - BUT we cap at carb target: if carb contribution > target, warn.
-   4) Sum totals, warn if carbs exceed, if fat deficit, or if protein source
-      already exceeds fat target.
-   ============================================================ */
+  const tP = parseFloat(document.getElementById('targetProtein').value) || 0;
+  const tF = parseFloat(document.getElementById('targetFat').value) || 0;
+  const tC = parseFloat(document.getElementById('targetCarbs').value) || 0;
+  const tCal = parseFloat(document.getElementById('targetCalories').value) || 0;
+  state.targets = { p: tP, f: tF, c: tC, cal: tCal };
+
+  const selectedIds = Object.keys(state.amounts);
+  if (selectedIds.length === 0) {
+    bar.classList.add('empty');
+    inst.textContent = 'Tap a food to start';
+    amountsEl.innerHTML = '';
+    totals.innerHTML = '';
+    document.getElementById('saveMealBtn').style.display = 'none';
+    currentMeal = null;
+    return;
+  }
+
+  bar.classList.remove('empty');
+  inst.textContent = 'Your meal:';
+
+  const rows = [];
+  let totalP = 0, totalF = 0, totalC = 0, totalCal = 0;
+
+  selectedIds.forEach(id => {
+    const food = findFood(id);
+    if (!food) return;
+    const units = state.amounts[id];
+    if (units <= 0) return;
+    const m = macrosForUnits(food, units);
+    totalP += m.p; totalF += m.f; totalC += m.c; totalCal += m.cal;
+    const amountStr = formatAmount(units, food.unit);
+    rows.push({ name: food.name, amount: amountStr });
+  });
+
+  // Render rows
+  amountsEl.innerHTML = rows.map(r => `
+    <div class="result-row">
+      <span class="food">${r.name}</span>
+      <span class="amount">${r.amount}</span>
+    </div>
+  `).join('');
+
+  // Compute deltas vs target
+  const dP = totalP - tP;
+  const dF = totalF - tF;
+  const dCal = totalCal - tCal;
+
+  const delta = (val, unit) => {
+    const rounded = Math.abs(val) < 1 ? 0 : Math.round(val);
+    if (rounded === 0) return `<span class="delta-ok">✓</span>`;
+    const sign = val > 0 ? '+' : '';
+    const cls = Math.abs(rounded) > (unit === 'cal' ? 100 : 10) ? 'delta-warn' : 'delta-mid';
+    return `<span class="${cls}">${sign}${rounded}</span>`;
+  };
+
+  let warnings = '';
+  if (totalC > tC) warnings += ` · <span class="warn">⚠ Carbs over (${totalC.toFixed(1)}/${tC})</span>`;
+
+  totals.innerHTML = `
+    <span><b>${Math.round(totalCal)}</b>cal ${delta(dCal, 'cal')}</span>
+    <span>P <b>${Math.round(totalP)}</b>g ${delta(dP, 'g')}</span>
+    <span>F <b>${Math.round(totalF)}</b>g ${delta(dF, 'g')}</span>
+    <span>C <b>${totalC.toFixed(1)}</b>g</span>
+    ${warnings}
+  `;
+
+  currentMeal = {
+    foods: rows.map(r => `${r.amount} ${r.name}`),
+    p: Math.round(totalP),
+    f: Math.round(totalF),
+    c: Math.round(totalC * 10) / 10,
+    cal: Math.round(totalCal),
+  };
+  document.getElementById('saveMealBtn').style.display = 'block';
+  document.getElementById('saveMealBtn').classList.remove('saved');
+  document.getElementById('saveMealBtn').textContent = '+ Save meal';
+}
+
+let currentMeal = null;
 
 function gramsForUnits(food, units) {
   return units * food.gramsPerUnit;
@@ -638,175 +1032,6 @@ function macrosForUnits(food, units) {
     cal: food.per100g.cal * g / 100,
     grams: g,
   };
-}
-function unitsToHitProtein(food, proteinTarget) {
-  // p per unit = per100g.p * gramsPerUnit / 100
-  const pPerUnit = food.per100g.p * food.gramsPerUnit / 100;
-  if (pPerUnit <= 0) return 0;
-  return proteinTarget / pPerUnit;
-}
-function unitsToHitFat(food, fatTarget) {
-  const fPerUnit = food.per100g.f * food.gramsPerUnit / 100;
-  if (fPerUnit <= 0) return 0;
-  return fatTarget / fPerUnit;
-}
-
-/*
-  Multi-protein solver:
-  - Combine selected proteins into a virtual "blended protein" by averaging
-    their per-gram macros (so each protein contributes equally by mass).
-  - If 2 proteins, the solver returns a total gram mass which is split 50/50.
-  - Then solve the 2x2 linear system as before:
-      m * blendedP + k * sumFatP = tP
-      m * blendedF + k * sumFatF = tF
-  - For edge cases (all fats have too much protein, or protein already over-fat),
-    clamp to non-negative and rely on warnings to explain to the user.
-*/
-function solveMeal(proteins, fats, tP, tF) {
-  if (proteins.length === 0) return null;
-  // Blended per-gram macros (equal-mass split)
-  const n = proteins.length;
-  let pP = 0, pF = 0;
-  proteins.forEach(p => {
-    pP += p.per100g.p / 100 / n;
-    pF += p.per100g.f / 100 / n;
-  });
-  let sumP = 0, sumF = 0;
-  const fatBaseG = fats.map(f => f.base * f.gramsPerUnit);
-  fats.forEach((f, i) => {
-    sumP += fatBaseG[i] * f.per100g.p / 100;
-    sumF += fatBaseG[i] * f.per100g.f / 100;
-  });
-  const det = pP * sumF - pF * sumP;
-  let mTotal, k;
-  if (fats.length === 0) {
-    // No fats — just hit protein (may overshoot fat, will warn)
-    mTotal = tP / pP;
-    k = 0;
-  } else if (Math.abs(det) < 1e-9) {
-    mTotal = tP / pP;
-    k = 0;
-  } else {
-    mTotal = (tP * sumF - tF * sumP) / det;
-    k = (pP * tF - pF * tP) / det;
-  }
-  if (mTotal < 0) mTotal = 0;
-  if (k < 0) k = 0;
-  // Return total grams (will be split equally across proteins)
-  return { totalProteinGrams: mTotal, gramsPerProtein: mTotal / n, fatScale: k };
-}
-
-function calculate() {
-  const bar = document.getElementById('resultBar');
-  const inst = document.getElementById('resultInstruction');
-  const amounts = document.getElementById('resultAmounts');
-  const totals = document.getElementById('resultTotals');
-
-  const tP = parseFloat(document.getElementById('targetProtein').value) || 0;
-  const tF = parseFloat(document.getElementById('targetFat').value) || 0;
-  const tC = parseFloat(document.getElementById('targetCarbs').value) || 0;
-  state.targets = { p: tP, f: tF, c: tC };
-
-  if (state.selectedProteins.length === 0) {
-    bar.classList.add('empty');
-    inst.textContent = 'Pick a protein to start';
-    amounts.innerHTML = '';
-    totals.innerHTML = '';
-    return;
-  }
-  if (state.selectedFats.length === 0) {
-    // Allow fat-less meals but warn; still run solver
-  }
-
-  bar.classList.remove('empty');
-  inst.textContent = 'Cook this:';
-
-  const results = [];
-  let totalP = 0, totalF = 0, totalC = 0, totalCal = 0;
-
-  const proteins = state.selectedProteins.map(id => PROTEINS.find(x => x.id === id));
-  const fats = state.selectedFats.map(id => FATS.find(x => x.id === id));
-
-  const solution = solveMeal(proteins, fats, tP, tF);
-  const { gramsPerProtein, fatScale } = solution;
-
-  // Edge detection
-  const fatTooHigh = fats.length > 0 && fatScale < 0.01;
-  const proteinTooHigh = gramsPerProtein < 1;
-
-  // 1. Proteins — each gets same mass (gramsPerProtein)
-  proteins.forEach(p => {
-    const units = gramsPerProtein / p.gramsPerUnit;
-    const m = macrosForUnits(p, units);
-    let displayName = p.name;
-    let amountStr = formatAmount(units, p.unit);
-
-    // Rotisserie bird-fraction hint
-    if (p.id === 'rotiss') {
-      const wholeBirdMeatOz = 20;
-      const fraction = units / wholeBirdMeatOz;
-      let birdNote;
-      if (fraction < 0.35) birdNote = '~1/4 bird';
-      else if (fraction < 0.6) birdNote = '~1/2 bird';
-      else if (fraction < 0.85) birdNote = '~3/4 bird';
-      else if (fraction < 1.1) birdNote = '~1 bird';
-      else birdNote = `~${fraction.toFixed(1)} birds`;
-      amountStr = `${amountStr} (${birdNote})`;
-    }
-
-    results.push({ name: displayName, amount: amountStr });
-    totalP += m.p; totalF += m.f; totalC += m.c; totalCal += m.cal;
-  });
-
-  // 2. Fats — each scaled by fatScale from its base portion
-  fats.forEach(fat => {
-    const units = fatScale * fat.base;
-    const m = macrosForUnits(fat, units);
-    const displayAmt = units < 0.05 ? 'skip (not needed)' : formatAmount(units, fat.unit);
-    results.push({ name: fat.name, amount: displayAmt, skip: units < 0.05 });
-    totalP += m.p; totalF += m.f; totalC += m.c; totalCal += m.cal;
-  });
-
-  // 3. Carbs — keep at base amount (side)
-  state.selectedCarbs.forEach(id => {
-    const carb = CARBS.find(x => x.id === id);
-    const units = carb.base;
-    const m = macrosForUnits(carb, units);
-    results.push({ name: carb.name, amount: formatAmount(units, carb.unit) });
-    totalP += m.p; totalF += m.f; totalC += m.c; totalCal += m.cal;
-  });
-
-  // Render
-  amounts.innerHTML = results.map(r => `
-    <div class="result-row${r.skip ? ' skip-row' : ''}">
-      <span class="food">${r.name}</span>
-      <span class="amount">${r.amount}</span>
-    </div>
-  `).join('');
-
-  const carbsOver = totalC > tC;
-  const overshoot = !proteinTooHigh && !fatTooHigh && (Math.abs(totalP - tP) > 2 || Math.abs(totalF - tF) > 2);
-  const proteinName = proteins.map(p => p.name).join(' + ');
-
-  let warnings = '';
-  if (proteinTooHigh) {
-    warnings += ` · <span class="warn">⚠ Fats add too much protein — drop one</span>`;
-  }
-  if (fatTooHigh) {
-    warnings += ` · <span class="warn">⚠ ${proteinName} has enough fat alone — skip fats</span>`;
-  }
-  if (overshoot) {
-    warnings += ` · <span class="warn">⚠ Can't balance — try a leaner protein</span>`;
-  }
-  if (carbsOver) warnings += ` · <span class="warn">⚠ Carbs over (${totalC.toFixed(1)}/${tC})</span>`;
-
-  totals.innerHTML = `
-    <span><b>${Math.round(totalCal)}</b>cal</span>
-    <span>P <b>${Math.round(totalP)}</b>g</span>
-    <span>F <b>${Math.round(totalF)}</b>g</span>
-    <span>C <b>${totalC.toFixed(1)}</b>g</span>
-    ${warnings}
-  `;
 }
 
 /* ============================================================
@@ -875,6 +1100,182 @@ document.querySelectorAll('.mode-toggle button').forEach(btn => {
 });
 
 /* ============================================================
+   MEAL LOG & STATS (localStorage-based)
+   ============================================================ */
+const STORAGE_KEY = 'keto-meal-builder-log-v1';
+
+function loadMeals() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+function saveMeals(meals) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(meals));
+  } catch (e) {
+    alert('Could not save — storage may be full or disabled.');
+  }
+}
+
+function saveCurrentMeal() {
+  if (!currentMeal) return;
+  const meals = loadMeals();
+  const entry = {
+    ...currentMeal,
+    ts: Date.now(),
+  };
+  meals.push(entry);
+  saveMeals(meals);
+
+  // Flash saved state on button
+  const btn = document.getElementById('saveMealBtn');
+  btn.classList.add('saved');
+  btn.textContent = '✓ Saved';
+  setTimeout(() => {
+    btn.classList.remove('saved');
+    btn.textContent = '+ Save meal';
+  }, 1500);
+
+  renderStats();
+}
+
+function deleteMeal(ts) {
+  const meals = loadMeals().filter(m => m.ts !== ts);
+  saveMeals(meals);
+  renderStats();
+}
+
+function startOfDay(ts) {
+  const d = new Date(ts);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+function daysAgo(n) {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - n);
+  return d.getTime();
+}
+function fmtTime(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const yest = new Date(now); yest.setDate(yest.getDate() - 1);
+  const isYest = d.toDateString() === yest.toDateString();
+  const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  if (sameDay) return `Today ${time}`;
+  if (isYest) return `Yest ${time}`;
+  return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + time;
+}
+
+function renderStats() {
+  const meals = loadMeals();
+  const today = startOfDay(Date.now());
+  const weekAgo = daysAgo(6); // last 7 days including today
+  const monthAgo = daysAgo(29);
+
+  const inToday = meals.filter(m => m.ts >= today);
+  const inWeek = meals.filter(m => m.ts >= weekAgo);
+  const inMonth = meals.filter(m => m.ts >= monthAgo);
+
+  // Today totals
+  const tCal = inToday.reduce((s, m) => s + m.cal, 0);
+  const tP = inToday.reduce((s, m) => s + m.p, 0);
+  const tF = inToday.reduce((s, m) => s + m.f, 0);
+  const tC = inToday.reduce((s, m) => s + m.c, 0);
+  document.getElementById('statTodayCal').textContent = tCal.toLocaleString();
+  document.getElementById('statTodayMeals').textContent = inToday.length;
+  document.getElementById('statTodayMacros').textContent = inToday.length
+    ? `P ${Math.round(tP)}g · F ${Math.round(tF)}g · C ${tC.toFixed(1)}g`
+    : '—';
+
+  // 7-day AVG per day (count unique days to avoid skew if sparse)
+  const daysWithMeals = new Set(inWeek.map(m => startOfDay(m.ts))).size || 1;
+  const wCal = inWeek.reduce((s, m) => s + m.cal, 0);
+  const wP = inWeek.reduce((s, m) => s + m.p, 0);
+  const wF = inWeek.reduce((s, m) => s + m.f, 0);
+  const wC = inWeek.reduce((s, m) => s + m.c, 0);
+  const avgCal = inWeek.length ? Math.round(wCal / daysWithMeals) : 0;
+  document.getElementById('statWeekCal').textContent = avgCal.toLocaleString();
+  document.getElementById('statWeekMacros').textContent = inWeek.length
+    ? `P ${Math.round(wP/daysWithMeals)}g · F ${Math.round(wF/daysWithMeals)}g · C ${(wC/daysWithMeals).toFixed(1)}g / day`
+    : '—';
+
+  // 30-day summary
+  const mTotalCal = inMonth.reduce((s, m) => s + m.cal, 0);
+  const monthDays = new Set(inMonth.map(m => startOfDay(m.ts))).size || 1;
+  document.getElementById('stat30day').innerHTML = inMonth.length
+    ? `<div>${inMonth.length} meals over ${monthDays} days</div>` +
+      `<div>Total: ${mTotalCal.toLocaleString()} cal</div>` +
+      `<div>Avg: ${Math.round(mTotalCal / monthDays).toLocaleString()} cal/day</div>`
+    : '—';
+
+  // Meal count
+  document.getElementById('mealCount').textContent = `${meals.length} logged`;
+
+  // Render meal log (most recent first, cap at 50 for perf)
+  const logEl = document.getElementById('mealLog');
+  if (meals.length === 0) {
+    logEl.innerHTML = `<div class="empty-log">No meals saved yet. Build a meal and tap "Save meal" to start tracking.</div>`;
+    return;
+  }
+  const recent = meals.slice().reverse().slice(0, 50);
+  logEl.innerHTML = recent.map(m => `
+    <div class="meal-entry" style="position:relative">
+      <button class="meal-entry-del" data-ts="${m.ts}" title="Delete">×</button>
+      <div class="meal-entry-head">
+        <span class="meal-entry-time">${fmtTime(m.ts)}</span>
+        <span class="meal-entry-cal">${m.cal} cal</span>
+      </div>
+      <div class="meal-entry-foods">${(m.foods || []).join(' · ')}</div>
+      <div class="meal-entry-macros">P ${m.p}g &nbsp; F ${m.f}g &nbsp; C ${m.c}g</div>
+    </div>
+  `).join('');
+  // Wire up delete buttons
+  logEl.querySelectorAll('.meal-entry-del').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const ts = parseInt(btn.dataset.ts, 10);
+      if (confirm('Delete this meal?')) deleteMeal(ts);
+    });
+  });
+}
+
+function exportData() {
+  const meals = loadMeals();
+  const blob = new Blob([JSON.stringify(meals, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `keto-meals-${date}.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function clearAllData() {
+  if (!confirm('Delete ALL saved meals? This cannot be undone.')) return;
+  if (!confirm('Are you absolutely sure? All your logged meals will be gone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  renderStats();
+}
+
+/* ============================================================
+   TAB SWITCHING
+   ============================================================ */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'stats') renderStats();
+    // Hide result bar on stats tab since it doesn't apply there
+    document.getElementById('resultBar').style.display = btn.dataset.tab === 'builder' ? '' : 'none';
+  });
+});
+
+/* ============================================================
    INIT
    ============================================================ */
 renderList(PROTEINS, document.getElementById('proteinList'), 'protein');
@@ -886,7 +1287,13 @@ document.getElementById('targetCalories').addEventListener('input', syncFromCalo
   document.getElementById(id).addEventListener('input', syncFromMacros);
 });
 
+// Save/export/clear wiring
+document.getElementById('saveMealBtn').addEventListener('click', saveCurrentMeal);
+document.getElementById('exportBtn').addEventListener('click', exportData);
+document.getElementById('clearBtn').addEventListener('click', clearAllData);
+
 calculate();
+renderStats();
 </script>
 </body>
 </html>
