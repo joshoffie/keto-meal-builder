@@ -477,6 +477,134 @@
     border-color: #2a5a2a;
   }
 
+  /* Save row with star button */
+  .meal-save-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .meal-save-row .save-meal-btn {
+    flex: 1;
+    margin-top: 0;
+  }
+  .save-fav-btn {
+    width: 50px;
+    background: #0a0a0a;
+    color: #d4ff3a;
+    border: 2px solid #0a0a0a;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 0;
+  }
+  .save-fav-btn:active { transform: scale(0.95); }
+  .save-fav-btn.is-fav {
+    background: #d4ff3a;
+    color: #0a0a0a;
+  }
+
+  /* Favorites section */
+  .favorites {
+    margin-bottom: 18px;
+  }
+  .favorites-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .fav-card {
+    background: #1a1a0a;
+    border: 1px solid #4a5a1a;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    min-height: 56px;
+  }
+  .fav-card:active {
+    background: #2a3a0a;
+    transform: scale(0.99);
+  }
+  .fav-card-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .fav-card-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #d4ff3a;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .fav-card-foods {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #999;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .fav-card-cal {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: #d4ff3a;
+    margin-left: 10px;
+  }
+  .fav-card-del {
+    margin-left: 8px;
+    background: transparent;
+    border: 1px solid #444;
+    color: #888;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .fav-card-del:active { background: #aa3333; color: #fff; border-color: #aa3333; }
+
+  /* Auto-suggest banner */
+  .fav-suggest {
+    background: #1a1a0a;
+    border: 1px dashed #4a5a1a;
+    padding: 12px;
+    margin-bottom: 12px;
+    color: #d4ff3a;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .fav-suggest-text {
+    flex: 1;
+    line-height: 1.4;
+  }
+  .fav-suggest-btn {
+    background: #d4ff3a;
+    color: #0a0a0a;
+    border: none;
+    padding: 8px 14px;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .fav-suggest-dismiss {
+    background: transparent;
+    border: 1px solid #444;
+    color: #888;
+    padding: 6px 10px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
   /* ========== STATS ========== */
   .stats-summary { margin-bottom: 20px; }
   .stat-row {
@@ -647,6 +775,15 @@
 <!-- ============ BUILDER TAB ============ -->
 <div class="tab-panel active" id="panel-builder">
 
+<!-- Favorites quick-log -->
+<section class="favorites" id="favoritesSection" style="display:none">
+  <div class="section-header">
+    <h2>Quick log</h2>
+    <span class="hint">Tap to add</span>
+  </div>
+  <div class="favorites-list" id="favoritesList"></div>
+</section>
+
 <div class="mode-toggle">
   <button class="active" data-mode="perMeal">Per meal</button>
   <button data-mode="daily">Daily</button>
@@ -754,7 +891,10 @@
   <div class="result-instruction" id="resultInstruction">Pick a protein + fat to start</div>
   <div class="result-amounts" id="resultAmounts"></div>
   <div class="result-totals" id="resultTotals"></div>
-  <button class="save-meal-btn" id="saveMealBtn" style="display:none">+ Save meal</button>
+  <div class="meal-save-row" id="mealSaveRow" style="display:none">
+    <button class="save-meal-btn" id="saveMealBtn">+ Save meal</button>
+    <button class="save-fav-btn" id="saveFavBtn" title="Save as favorite">★</button>
+  </div>
 </div>
 
 <script>
@@ -968,7 +1108,7 @@ function calculate() {
     inst.textContent = 'Tap a food to start';
     amountsEl.innerHTML = '';
     totals.innerHTML = '';
-    document.getElementById('saveMealBtn').style.display = 'none';
+    document.getElementById('mealSaveRow').style.display = 'none';
     currentMeal = null;
     return;
   }
@@ -1029,7 +1169,7 @@ function calculate() {
     c: Math.round(totalC * 10) / 10,
     cal: Math.round(totalCal),
   };
-  document.getElementById('saveMealBtn').style.display = 'block';
+  document.getElementById('mealSaveRow').style.display = 'flex';
   document.getElementById('saveMealBtn').classList.remove('saved');
   document.getElementById('saveMealBtn').textContent = '+ Save meal';
 }
@@ -1134,6 +1274,211 @@ function saveMeals(meals) {
   }
 }
 
+/* ============================================================
+   FAVORITES (saved meal templates)
+   ============================================================ */
+const FAV_STORAGE_KEY = 'keto-meal-builder-favorites-v1';
+const SUGGEST_DISMISS_KEY = 'keto-meal-builder-fav-dismissed-v1';
+const AUTO_SUGGEST_THRESHOLD = 3; // log same meal N times → suggest
+
+function loadFavs() {
+  try { return JSON.parse(localStorage.getItem(FAV_STORAGE_KEY) || '[]'); }
+  catch (e) { return []; }
+}
+function saveFavs(list) {
+  localStorage.setItem(FAV_STORAGE_KEY, JSON.stringify(list));
+}
+function loadDismissed() {
+  try { return JSON.parse(localStorage.getItem(SUGGEST_DISMISS_KEY) || '[]'); }
+  catch (e) { return []; }
+}
+function saveDismissed(list) {
+  localStorage.setItem(SUGGEST_DISMISS_KEY, JSON.stringify(list));
+}
+
+// Build a stable signature from a meal (foods array → sorted joined string)
+function mealSignature(meal) {
+  return (meal.foods || []).slice().sort().join('||');
+}
+
+function saveAsFavorite(name, meal) {
+  const favs = loadFavs();
+  // Don't double-save: if a fav with same signature exists, just rename
+  const sig = mealSignature(meal);
+  const existing = favs.find(f => mealSignature(f) === sig);
+  if (existing) {
+    existing.name = name;
+    saveFavs(favs);
+    renderFavorites();
+    return;
+  }
+  favs.push({
+    name,
+    foods: meal.foods,
+    p: meal.p, f: meal.f, c: meal.c, cal: meal.cal,
+    createdAt: Date.now(),
+  });
+  saveFavs(favs);
+  renderFavorites();
+}
+
+function deleteFavorite(name, createdAt) {
+  const favs = loadFavs().filter(f => !(f.name === name && f.createdAt === createdAt));
+  saveFavs(favs);
+  renderFavorites();
+}
+
+function logFavoriteAsMeal(fav) {
+  if (!confirm(`Log "${fav.name}" as a meal right now?\n\n${fav.foods.join(' · ')}\n${fav.cal} cal · P ${fav.p}g · F ${fav.f}g · C ${fav.c}g`)) return;
+  const meals = loadMeals();
+  meals.push({
+    foods: fav.foods, p: fav.p, f: fav.f, c: fav.c, cal: fav.cal,
+    ts: Date.now(),
+    fromFavorite: fav.name,
+  });
+  saveMeals(meals);
+  renderStats();
+  renderFavorites();
+  // Brief feedback
+  alert(`✓ Logged: ${fav.name}`);
+}
+
+function renderFavorites() {
+  const sec = document.getElementById('favoritesSection');
+  const list = document.getElementById('favoritesList');
+  const favs = loadFavs();
+
+  // Render auto-suggest banner (if relevant) at top of section
+  const suggestion = getAutoSuggestion();
+
+  if (favs.length === 0 && !suggestion) {
+    sec.style.display = 'none';
+    return;
+  }
+  sec.style.display = 'block';
+
+  let html = '';
+  if (suggestion) {
+    html += `
+      <div class="fav-suggest" data-sig="${escapeAttr(suggestion.sig)}">
+        <div class="fav-suggest-text">
+          You've logged "<b>${escapeHtml((suggestion.foods||[]).join(' · '))}</b>" ${suggestion.count}× — save as favorite?
+        </div>
+        <button class="fav-suggest-btn" data-action="accept">Save</button>
+        <button class="fav-suggest-dismiss" data-action="dismiss">×</button>
+      </div>
+    `;
+  }
+  html += favs.map(f => `
+    <div class="fav-card" data-name="${escapeAttr(f.name)}" data-created="${f.createdAt}">
+      <div class="fav-card-info">
+        <div class="fav-card-name">${escapeHtml(f.name)}</div>
+        <div class="fav-card-foods">${escapeHtml((f.foods || []).join(' · '))}</div>
+      </div>
+      <div class="fav-card-cal">${f.cal}</div>
+      <button class="fav-card-del" title="Delete favorite">×</button>
+    </div>
+  `).join('');
+  list.innerHTML = html;
+
+  // Wire up clicks on suggestion banner (if present)
+  const suggestEl = list.querySelector('.fav-suggest');
+  if (suggestEl) {
+    const sig = suggestEl.dataset.sig;
+    const acceptBtn = suggestEl.querySelector('[data-action="accept"]');
+    const dismissBtn = suggestEl.querySelector('[data-action="dismiss"]');
+    if (acceptBtn) acceptBtn.addEventListener('click', (e) => { e.stopPropagation(); acceptSuggestion(sig); });
+    if (dismissBtn) dismissBtn.addEventListener('click', (e) => { e.stopPropagation(); dismissSuggestion(sig); });
+  }
+
+  // Wire up clicks
+  list.querySelectorAll('.fav-card').forEach(card => {
+    const name = card.dataset.name;
+    const createdAt = parseInt(card.dataset.created, 10);
+    const fav = favs.find(f => f.name === name && f.createdAt === createdAt);
+    if (!fav) return;
+    card.addEventListener('click', (e) => {
+      // Skip if delete button was tapped
+      if (e.target.closest('.fav-card-del')) return;
+      logFavoriteAsMeal(fav);
+    });
+    const delBtn = card.querySelector('.fav-card-del');
+    if (delBtn) {
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm(`Delete favorite "${fav.name}"?`)) deleteFavorite(fav.name, fav.createdAt);
+      });
+    }
+  });
+}
+
+// Helpers for safe HTML
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) {
+  return escapeHtml(s);
+}
+
+// Find a meal signature that's been logged AUTO_SUGGEST_THRESHOLD+ times
+// AND isn't already a favorite AND hasn't been dismissed.
+function getAutoSuggestion() {
+  const meals = loadMeals();
+  const favs = loadFavs();
+  const dismissed = loadDismissed();
+  const favSigs = new Set(favs.map(mealSignature));
+
+  // Count signatures
+  const counts = {};
+  meals.forEach(m => {
+    const sig = mealSignature(m);
+    if (!sig) return;
+    if (favSigs.has(sig)) return;
+    if (dismissed.includes(sig)) return;
+    if (!counts[sig]) counts[sig] = { count: 0, foods: m.foods, sig };
+    counts[sig].count++;
+  });
+
+  // Pick the highest-count one over the threshold
+  let best = null;
+  for (const sig in counts) {
+    if (counts[sig].count >= AUTO_SUGGEST_THRESHOLD) {
+      if (!best || counts[sig].count > best.count) best = counts[sig];
+    }
+  }
+  return best;
+}
+
+function acceptSuggestion(sig) {
+  const meals = loadMeals();
+  const match = meals.find(m => mealSignature(m) === sig);
+  if (!match) return;
+  const name = prompt('Name this favorite:', shortNameForMeal(match));
+  if (!name) return;
+  saveAsFavorite(name.trim().slice(0, 60), match);
+}
+
+function dismissSuggestion(sig) {
+  const list = loadDismissed();
+  if (!list.includes(sig)) list.push(sig);
+  saveDismissed(list);
+  renderFavorites();
+}
+
+// Make acceptSuggestion/dismissSuggestion globally accessible (used in inline onclick)
+window.acceptSuggestion = acceptSuggestion;
+window.dismissSuggestion = dismissSuggestion;
+
+// Suggest a short name from foods (e.g., "Ribeye + avocado")
+function shortNameForMeal(m) {
+  if (!m || !m.foods || m.foods.length === 0) return 'My meal';
+  // Strip amount from each food string ("1 lb Ribeye steak" → "Ribeye steak")
+  const stripped = m.foods.map(f => f.replace(/^[\d./]+\s*(?:[a-z]+\s+)?(?:[a-z]+\s+)?/i, ''));
+  if (stripped.length === 1) return stripped[0];
+  return stripped.slice(0, 2).join(' + ');
+}
+
+
 function saveCurrentMeal() {
   if (!currentMeal) return;
   const meals = loadMeals();
@@ -1154,6 +1499,19 @@ function saveCurrentMeal() {
   }, 1500);
 
   renderStats();
+  renderFavorites(); // re-render in case auto-suggest threshold was crossed
+}
+
+function saveCurrentMealAsFavorite() {
+  if (!currentMeal) return;
+  const suggested = shortNameForMeal(currentMeal);
+  const name = prompt('Name this favorite:', suggested);
+  if (!name) return;
+  saveAsFavorite(name.trim().slice(0, 60), currentMeal);
+  // Visual feedback
+  const star = document.getElementById('saveFavBtn');
+  star.classList.add('is-fav');
+  setTimeout(() => star.classList.remove('is-fav'), 1500);
 }
 
 function deleteMeal(ts) {
@@ -1305,11 +1663,13 @@ document.getElementById('targetCalories').addEventListener('input', syncFromCalo
 
 // Save/export/clear wiring
 document.getElementById('saveMealBtn').addEventListener('click', saveCurrentMeal);
+document.getElementById('saveFavBtn').addEventListener('click', saveCurrentMealAsFavorite);
 document.getElementById('exportBtn').addEventListener('click', exportData);
 document.getElementById('clearBtn').addEventListener('click', clearAllData);
 
 calculate();
 renderStats();
+renderFavorites();
 </script>
 </body>
 </html>
